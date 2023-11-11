@@ -8,6 +8,7 @@ import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.flow.component.charts.model.Legend;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.notification.Notification;
@@ -60,13 +61,10 @@ public class DataView extends VerticalLayout implements HasUrlParameter<String> 
     }
 
     private void configuration(){
-        Integer maxValues = customService.getMaxValues();
         items = new DataSeries("values");
-        for(int x = 1;x<=maxValues;x++){
-            items.add(new DataSeriesItem(x,1.0));
-        }
+        defaultChart();
         Configuration configuration = chart.getConfiguration();
-        configuration.getChart().setType(ChartType.SPLINE);
+        configuration.getChart().setType(ChartType.LINE);
         XAxis xAxis = configuration.getxAxis();
         xAxis.setTitle("index");
         YAxis yAxis = configuration.getyAxis();
@@ -75,16 +73,28 @@ public class DataView extends VerticalLayout implements HasUrlParameter<String> 
     }
 
     private void emptyChart(){
+        items.clear();
+    }
+
+    private void defaultChart(){
         Integer maxValues = customService.getMaxValues();
+        System.out.println(maxValues);
         items.clear();
         for(int x = 1;x<=maxValues;x++){
-            items.add(new DataSeriesItem(x,0.0));
+            items.add(new DataSeriesItem(x,1.0));
         }
     }
 
     public void updateData(ConcurrentLinkedQueue<Double> values) {
+        System.out.println("udapte data");
         if(values == null){
             emptyChart();
+            chart.drawChart(true);
+            return;
+        }
+        if(values.isEmpty()){
+            defaultChart();
+            chart.drawChart(true);
             return;
         }
         Iterator<Double> iterator = values.iterator();
@@ -96,12 +106,12 @@ public class DataView extends VerticalLayout implements HasUrlParameter<String> 
             items.add(new DataSeriesItem(x,next));
             x++;
         }
-        items.setName(map.getOrDefault(this.id, "CHECK ID WHICH SEND"));
+        chart.drawChart(true);
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
-        thread = UpdateThread.getInstance(attachEvent.getUI(), this, customService,this.id);
+        thread = UpdateThread.getInstance(attachEvent.getUI(), this, customService, this.id);
     }
 
     @Override
@@ -121,10 +131,14 @@ public class DataView extends VerticalLayout implements HasUrlParameter<String> 
                 if(customService.getKeys().contains(localId)){
                     this.id = localId;
                 }else{
+                    emptyChart();
                     notification = Notification.show("Welcome anonymous. Please insert id in [1,15]",
                             5000, Notification.Position.TOP_CENTER);
-                    emptyChart();
                 }
+                Configuration configuration = chart.getConfiguration();
+                configuration.getxAxis().getLabels().setStep(1);
+                Legend legend = configuration.getLegend();
+                legend.getTitle().setText(map.getOrDefault(localId,"CHECK ID WHICH SEND"));
             }catch (NumberFormatException ex){
                 notification = Notification.show("Welcome anonymous. Please insert valid id value",
                             5000, Notification.Position.TOP_CENTER);
@@ -142,13 +156,14 @@ public class DataView extends VerticalLayout implements HasUrlParameter<String> 
             }else{
                 instance.view = view;
                 instance.ui = ui;
+                instance.key = key;
             }
             return instance;
         }
         private UI ui;
         private DataView view;
         private final CustomService customService;
-        private final Integer key;
+        private Integer key;
 
         public boolean flagStoped;
 
@@ -165,10 +180,11 @@ public class DataView extends VerticalLayout implements HasUrlParameter<String> 
             try {
                 while (this.flagStoped) {
                     ui.access(() -> view.updateData(customService.getValues(key)));
-                    Thread.sleep(1000);
+                    Thread.sleep(5L*1000);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
+
             }
         }
     }

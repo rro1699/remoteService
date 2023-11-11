@@ -2,7 +2,6 @@ package com.example.remoteService;
 
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -59,6 +58,12 @@ public class CustomService {
             return false;
         }else{
             ConcurrentLinkedQueue<Double> values = numberToValuesMap.get(key);
+            if(values.size()>=maxValues){
+                int differentSize = values.size() - maxValues;
+                for(int x = 0; x <= differentSize; x++){
+                    values.poll();
+                }
+            }
             if(values.size()<maxValues){
                 values.add(value);
             }else{
