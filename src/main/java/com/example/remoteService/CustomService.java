@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Service
 public class CustomService {
-    private Map<Integer, ConcurrentLinkedQueue<Double>> numberToValuesMap;
+    private final Map<Integer, ConcurrentLinkedQueue<Double>> numberToValuesMap;
     private Integer maxValues;
     private final static int MAX_VALUES = 50;
 
