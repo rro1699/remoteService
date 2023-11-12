@@ -78,7 +78,6 @@ public class DataView extends VerticalLayout implements HasUrlParameter<String> 
 
     private void defaultChart(){
         Integer maxValues = customService.getMaxValues();
-        System.out.println(maxValues);
         items.clear();
         for(int x = 1;x<=maxValues;x++){
             items.add(new DataSeriesItem(x,1.0));
@@ -86,7 +85,6 @@ public class DataView extends VerticalLayout implements HasUrlParameter<String> 
     }
 
     public void updateData(ConcurrentLinkedQueue<Double> values) {
-        System.out.println("udapte data");
         if(values == null){
             emptyChart();
             chart.drawChart(true);

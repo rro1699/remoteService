@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -24,7 +25,7 @@ public class MainController {
         customService.setMaxValues(size);
         return ResponseEntity.ok().build();
     }
-    @RequestMapping("/v1/{key}")
+    @RequestMapping(value = "/v1/{key}",method = RequestMethod.POST)
     public ResponseEntity<?> executeV1(@PathVariable(name = "key") Integer key,@RequestBody V1DTO body){
         if(customService.v1AddValue(key, body.getValue())){
             return ResponseEntity.ok().build();
