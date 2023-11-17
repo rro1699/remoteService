@@ -53,7 +53,7 @@ public class CustomService {
         return maxValues;
     }
 
-    public boolean v1AddValue(Integer key, Double value){
+    public synchronized boolean v1AddValue(Integer key, Double value){
         if(!numberToValuesMap.containsKey(key)){
             return false;
         }else{
@@ -72,5 +72,8 @@ public class CustomService {
             }
         }
         return true;
+    }
+    public synchronized ConcurrentLinkedQueue<Double> getV1(Integer key){
+        return numberToValuesMap.getOrDefault(key, null);
     }
 }

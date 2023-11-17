@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 @RestController
 public class MainController {
     private final CustomService customService;
@@ -31,6 +33,16 @@ public class MainController {
             return ResponseEntity.ok().build();
         }else{
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @RequestMapping(value = "/get/{key}",method = RequestMethod.GET)
+    public ResponseEntity<?> getV1(@PathVariable(name = "key") Integer key){
+        ConcurrentLinkedQueue<Double> values = customService.getV1(key);
+        if (values == null){
+            return ResponseEntity.badRequest().build();
+        }else{
+            return ResponseEntity.ok().body(values);
         }
     }
 }
