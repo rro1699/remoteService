@@ -3,6 +3,7 @@ package com.example.remoteService;
 import com.example.remoteService.DTO.V2DTO;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -52,6 +53,7 @@ public class CustomService {
     }
 
     public Set<Integer> getKeys(){
+        numberToValuesMap.keySet().forEach(System.out::println);
         return numberToValuesMap.keySet();
     }
 

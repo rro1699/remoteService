@@ -132,6 +132,7 @@ public class DataView extends VerticalLayout implements HasUrlParameter<String> 
                 if(customService.getKeys().contains(localId)){
                     this.id = localId;
                     this.version = version;
+                    System.out.println("id="+id+"; version="+version);
                 }else{
                     emptyChart();
                     notification = Notification.show("Welcome anonymous. Please insert id in [1,15]",
