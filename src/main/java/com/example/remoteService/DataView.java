@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @Route(value = "data")
 public class DataView extends VerticalLayout implements HasUrlParameter<String> {
     private Integer id;
+    private String version;
     private Notification notification;
     private final CustomService customService;
     private UpdateThread thread;
@@ -109,7 +110,7 @@ public class DataView extends VerticalLayout implements HasUrlParameter<String> 
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
-        thread = UpdateThread.getInstance(attachEvent.getUI(), this, customService, this.id);
+        thread = UpdateThread.getInstance(attachEvent.getUI(), this, customService, this.id, this.version);
     }
 
     @Override
@@ -125,9 +126,12 @@ public class DataView extends VerticalLayout implements HasUrlParameter<String> 
                     5000, Notification.Position.TOP_CENTER);
         } else {
             try {
-                int localId = Integer.parseInt(parameter);
+                String[] queryParams = parameter.split("&");
+                String version = queryParams[0].split("=")[1];
+                int localId = Integer.parseInt(queryParams[1].split("=")[1]);
                 if(customService.getKeys().contains(localId)){
                     this.id = localId;
+                    this.version = version;
                 }else{
                     emptyChart();
                     notification = Notification.show("Welcome anonymous. Please insert id in [1,15]",
@@ -147,14 +151,15 @@ public class DataView extends VerticalLayout implements HasUrlParameter<String> 
 
     private static class UpdateThread extends Thread {
         private static UpdateThread instance;
-        public static UpdateThread getInstance(UI ui, DataView view, CustomService controllerService, Integer key){
+        public static UpdateThread getInstance(UI ui, DataView view, CustomService controllerService, Integer key, String version){
             if (instance == null){
-                instance = new UpdateThread(ui, view, controllerService, key);
+                instance = new UpdateThread(ui, view, controllerService, key, version);
                 instance.start();
             }else{
                 instance.view = view;
                 instance.ui = ui;
                 instance.key = key;
+                instance.version = version;
             }
             return instance;
         }
@@ -162,22 +167,24 @@ public class DataView extends VerticalLayout implements HasUrlParameter<String> 
         private DataView view;
         private final CustomService customService;
         private Integer key;
+        private String version;
 
         public boolean flagStoped;
 
-        private UpdateThread(UI ui, DataView view, CustomService controllerService, Integer key) {
+        private UpdateThread(UI ui, DataView view, CustomService controllerService, Integer key, String version) {
             this.ui = ui;
             this.view = view;
             this.customService = controllerService;
             this.flagStoped = true;
             this.key = key;
+            this.version = version;
         }
 
         @Override
         public void run() {
             try {
                 while (this.flagStoped) {
-                    ui.access(() -> view.updateData(customService.getValues(key)));
+                    ui.access(() -> view.updateData(version.equals("v1") ? customService.getValues(key) : customService.getValues2(key)));
                     Thread.sleep(5L*1000);
                 }
             } catch (InterruptedException e) {

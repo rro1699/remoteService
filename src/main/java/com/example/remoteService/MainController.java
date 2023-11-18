@@ -1,6 +1,7 @@
 package com.example.remoteService;
 
 import com.example.remoteService.DTO.V1DTO;
+import com.example.remoteService.DTO.V2DTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,13 +37,32 @@ public class MainController {
         }
     }
 
-    @RequestMapping(value = "/get/{key}",method = RequestMethod.GET)
+    @RequestMapping(value = "/v2/{key}",method = RequestMethod.POST)
+    public ResponseEntity<?> executeV2(@PathVariable(name = "key") Integer key, @RequestBody V2DTO body){
+        System.out.println(body);
+        if(customService.v2AddValue(key, body.getValue(), body.getSensorName())){
+            return ResponseEntity.ok().build();
+        }else{
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @RequestMapping(value = "/getV1/{key}",method = RequestMethod.GET)
     public ResponseEntity<?> getV1(@PathVariable(name = "key") Integer key){
         ConcurrentLinkedQueue<Double> values = customService.getV1(key);
         if (values == null){
             return ResponseEntity.badRequest().build();
         }else{
             return ResponseEntity.ok().body(values);
+        }
+    }
+    @RequestMapping(value = "/getV2/{key}",method = RequestMethod.GET)
+    public ResponseEntity<?> getV2(@PathVariable(name = "key") Integer key){
+        String result = customService.getV2(key);
+        if (result == null){
+            return ResponseEntity.badRequest().build();
+        }else{
+            return ResponseEntity.ok().body(result);
         }
     }
 }
